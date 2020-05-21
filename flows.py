@@ -8,11 +8,6 @@ from prefect.environments.execution import RemoteEnvironment
 import random
 from time import sleep
 
-schedule = IntervalSchedule(
-    start_date=datetime.utcnow() + timedelta(seconds=1),
-    interval=timedelta(minutes=5),
-)
-
 @task
 def inc(x):
     logger = prefect.context.get("logger")
