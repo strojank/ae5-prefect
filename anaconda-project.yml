@@ -1,5 +1,5 @@
 name: Prefect
-description: A simple Prefect test
+description: A simple Prefect test with Dask execution
 commands:
   default:
     unix: bash prefect_run.sh
@@ -10,3 +10,4 @@ env_specs:
     - conda-forge
     packages:
     - prefect
+    - dask

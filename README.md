@@ -6,7 +6,7 @@ These files currently assume the use of Prefect Cloud. Future versions of this r
 
 ## Files
 - `anaconda-project.yml`: the project specification. Currently, the package 
-  list has exactly one dependency, `prefect`. Add any other packages you 
+  list has two dependencies, `prefect` and `dask`. Add any other packages you 
   need to implement your Flows to this list. Note however that Prefect does 
   require Python 3.6 or later.
 - `endpoint/index.html`: this is a very simple static web page that is
@@ -20,12 +20,16 @@ These files currently assume the use of Prefect Cloud. Future versions of this r
   as many Python files as you wish to implement your flows, but this script 
   needs to import them and register them with the Prefect server.
 - `prefect_run.sh`: this is the script that the AE5 deployment runs. It does
-  four things:
+  six things:
   1. Launches the background web server to keep the AE5 deployment healthy
-  2. Authenticates with the Prefect server (currently assumes Prefect Cloud)
-  3. Runs `flows.py` to create and register the flows
-  4. Launches Prefect Agent to connect to the server for monitoring and
+  2. Launches a local Dask cluster
+  3. Points Prefect to the cluster
+  4. Authenticates with the Prefect server (currently assumes Prefect Cloud)
+  5. Runs `flows.py` to create and register the flows
+  6. Launches Prefect Agent to connect to the server for monitoring and
      notification
+- `prefect_config.sh`: creates a config.toml file with local secrets inside /opt/continuum/.prefect folder. Needed for registering flow with Prefect Cloud. Secret with matching names must also be available in Prefect Clouds's Secrets.
+- `secrets.py`: an example for using Secrets with Azure Storage Account.
 
 ## Instructions
 1. You need one USER token and one RUNNER token from Prefect Cloud.
@@ -33,6 +37,8 @@ These files currently assume the use of Prefect Cloud. Future versions of this r
    account settings screen (`/account/settings`) and add two secrets:
    - `prefectuser` for the USER token value
    - `prefectrunner` for the RUNNER token value.
+   If using Secrets you should also add:
+   - `azure_connect_str` for Azure Storage Account
 2. Create a new project in AE5 and include these files. Note that the
    `endpoint` directory is essential; do not just include `index.html` into
    the root of your project.
@@ -40,7 +46,7 @@ These files currently assume the use of Prefect Cloud. Future versions of this r
    will include a `flow.register` statement for each flow you wish to 
    include here. The flows should _not_ be run by the script (`flow.run`), 
    only registered.
-4. Launch a terminal and run `prefect_run.sh`. This will authenticate to the
+4. Launch a terminal and run `prefect_run.sh`. This will create a local Dask cluster, authenticate to the
    server, register your flows, and launch a local agent. Head over to
    Prefect Cloud and confirm that the agent has successfully connected, and
    if you wish launch runs of each flow to confirm that they are operating 
@@ -54,11 +60,9 @@ These files currently assume the use of Prefect Cloud. Future versions of this r
 ## TBD
 
 There is a lot that can be done to improve this. Initial thoughts:
-- Make better use of multicore AE5 deployments using local Dask execution
 - Support connections to internally deployed Prefect UI servers.
 - Do something interesting with the web endpoint—redirect to the appropriate
-  status page on Prefect Server, provide a simple log viewer that allows the
-  logs for the individual runs to be viewed; etc.
+  status page on Prefect Server: show Dask cluster dashboard
 - Flesh out best practices for when to run multiple flows in the same
   versus running separate deployments. 
 - Build a much more ambitious sample flow
