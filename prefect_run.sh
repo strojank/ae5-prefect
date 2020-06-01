@@ -1,7 +1,7 @@
 trap 'kill $(jobs -p)' EXIT
 
 # Start local Dask cluster
-nohup dask-scheduler &
+nohup dask-scheduler --dashboard-address :8086 &
 nohup dask-worker localhost:8786 --nthreads 4 &
 nohup dask-worker localhost:8786 --nthreads 4 &
 
@@ -13,7 +13,6 @@ prefect_runner_token=$(cat /var/run/secrets/user_credentials/prefectrunner)
 export PREFECT__ENGINE__EXECUTOR__DEFAULT_CLASS=prefect.engine.executors.DaskExecutor
 export PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS=$dask_cluster_address
 
-python -m http.server 8086 --directory endpoint &
 prefect auth login -t $prefect_user_token
 python flows.py
 prefect agent start -t $prefect_runner_token
